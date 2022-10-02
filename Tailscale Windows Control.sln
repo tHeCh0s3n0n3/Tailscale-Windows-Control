@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32922.545
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tailscale Windows Control", "Tailscale Windows Control\Tailscale Windows Control.csproj", "{B1C9DB5D-9DF1-4750-ACB2-65F1317A9AEB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B1C9DB5D-9DF1-4750-ACB2-65F1317A9AEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1C9DB5D-9DF1-4750-ACB2-65F1317A9AEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1C9DB5D-9DF1-4750-ACB2-65F1317A9AEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1C9DB5D-9DF1-4750-ACB2-65F1317A9AEB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C6FAF037-D5BB-4009-BB80-5C6D7E160603}
+	EndGlobalSection
+EndGlobal
