@@ -63,8 +63,8 @@ public sealed class Peer : IEquatable<Peer>
     public List<string>? Addrs { get; set; }
     public string? CurAddr { get; set; }
     public string? Relay { get; set; }
-    public int? RxBytes { get; set; }
-    public int? TxBytes { get; set; }
+    public long? RxBytes { get; set; }
+    public long? TxBytes { get; set; }
     public DateTime? Created { get; set; }
     public DateTime? LastWrite { get; set; }
     public DateTime? LastSeen { get; set; }
