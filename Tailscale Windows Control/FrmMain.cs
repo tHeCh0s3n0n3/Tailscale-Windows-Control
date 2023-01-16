@@ -1,3 +1,4 @@
+using Microsoft.WindowsAPICodePack.Taskbar;
 using Timer = System.Windows.Forms.Timer;
 
 namespace Tailscale_Windows_Control;
@@ -8,6 +9,8 @@ public partial class FrmMain : Form
     public readonly Button _btnGetStatus;
     public readonly Timer _timer;
     private List<Peer>? _exitNodes;
+
+    private readonly NotifyIcon taskbarIcon = new();
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     public FrmMain()
@@ -44,12 +47,28 @@ public partial class FrmMain : Form
         _timer.Start();
 
         lblStatusText.DataBindings.Add("Text", _vm, nameof(_vm.StatusLabel));
+        this.DataBindings.Add("Icon", _vm, nameof(_vm.TaskbarIcon));
     }
 
     private async void Timer_Tick(object? sender, EventArgs e)
     {
         await _vm.GetStatusCommand.ExecuteAsync(null);
         SetConnectionButtons();
+
+        if (_vm.TaskbarIconOverlay is not null)
+        {
+#pragma warning disable CS8604 // Possible null reference argument.
+            TaskbarManager.Instance.SetOverlayIcon(_vm.TaskbarIconOverlay, _vm.TaskbarIconOverlayText);
+#pragma warning restore CS8604 // Possible null reference argument.
+        }
+        else
+        {
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
+            TaskbarManager.Instance.SetOverlayIcon(null, null);
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
+        }
+        
+
     }
 
     private async void BtnGetStatus_Click(object? sender, EventArgs e)
@@ -98,6 +117,9 @@ public partial class FrmMain : Form
             flpExitNodeButtons.Controls.AddRange(exitNodeButtons.ToArray());
             _exitNodes = newExitNodes;
         }
+
+        taskbarIcon.Visible = true;
+        taskbarIcon.Icon = _vm.TaskbarIcon;
     }
 
     private async void BtnExitNode_Click(object? sender, EventArgs e)
@@ -107,7 +129,7 @@ public partial class FrmMain : Form
             return;
         }
 
-        string? peerId = ((Button)sender).Tag.ToString();
+        string? peerId = ((Button)sender).Tag?.ToString();
 
         if (peerId is null)
         {
