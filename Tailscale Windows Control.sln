@@ -10,6 +10,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{2CC1C015-E84E-4F46-9DA0-B49EAD59B52C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "codeql", "codeql", "{BE6106AF-15C1-4075-9A4E-5FE8F5259EE8}"
+	ProjectSection(SolutionItems) = preProject
+		.github\codeql\codeql-config.yml = .github\codeql\codeql-config.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{0ABEB7E5-CEE6-4030-B81E-CBF65365D6BE}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\codeql-analysis.yml = .github\workflows\codeql-analysis.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,6 +35,11 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2CC1C015-E84E-4F46-9DA0-B49EAD59B52C} = {247EB262-1574-43F0-B7B9-7BE0CD809B80}
+		{BE6106AF-15C1-4075-9A4E-5FE8F5259EE8} = {2CC1C015-E84E-4F46-9DA0-B49EAD59B52C}
+		{0ABEB7E5-CEE6-4030-B81E-CBF65365D6BE} = {2CC1C015-E84E-4F46-9DA0-B49EAD59B52C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C6FAF037-D5BB-4009-BB80-5C6D7E160603}
