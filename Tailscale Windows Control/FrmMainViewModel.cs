@@ -55,8 +55,7 @@ public sealed partial class FrmMainViewModel : ObservableObject
     {
         ArgumentNullException.ThrowIfNull(ipAddress);
 
-        string output = await ExecuteTailscaleCommand($"up --reset --exit-node={ipAddress} --exit-node-allow-lan-access");
-        CommandResult = output;
+        CommandResult = await ExecuteTailscaleCommand($"up --reset --exit-node={ipAddress} --exit-node-allow-lan-access");
 
         StatusLabel = "Connecting...";
     }
@@ -64,15 +63,14 @@ public sealed partial class FrmMainViewModel : ObservableObject
     [RelayCommand]
     private async void Disconnect()
     {
-        string output = await ExecuteTailscaleCommand("up --reset --exit-node=");
-        CommandResult = output;
+        CommandResult = await ExecuteTailscaleCommand("up --reset --exit-node=");
         StatusLabel = "Disconnecting...";
     }
 
     [RelayCommand]
     private async Task<string> ExecuteTailscaleCommand(string arguments)
     {
-        Process p = new();
+        using Process p = new();
         p.StartInfo.UseShellExecute = false;
         p.StartInfo.RedirectStandardOutput = true;
         p.StartInfo.FileName = TailscaleLocation;
