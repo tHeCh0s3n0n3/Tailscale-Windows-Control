@@ -31,13 +31,13 @@ public sealed partial class FrmMainViewModel : ObservableObject
     private bool isConnected;
 
     public Icon TaskbarIcon
-        => isConnected ? ConnectedIcon : DisconnectedIcon;
+        => IsConnected ? ConnectedIcon : DisconnectedIcon;
 
     public Icon? TaskbarIconOverlay
-        => isConnected ? ConnectedIconOverlay : null;
+        => IsConnected ? ConnectedIconOverlay : null;
 
     public string? TaskbarIconOverlayText
-        => isConnected ? StatusLabel : null;
+        => IsConnected ? StatusLabel : null;
 
     //public List<Peer>? ExitNodePeers
     //    => status?.Peers?.Select(p => p.Value)
@@ -109,12 +109,12 @@ public sealed partial class FrmMainViewModel : ObservableObject
         if (connectedPeer is not null)
         {
             StatusLabel = $"Connected ({connectedPeer.HostName})";
-            isConnected = true;
+            IsConnected = true;
         }
         else
         {
             StatusLabel = "Ready!";
-            isConnected = false;
+            IsConnected = false;
         }
     }
 
