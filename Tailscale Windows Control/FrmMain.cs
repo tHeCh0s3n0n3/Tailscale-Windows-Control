@@ -1,4 +1,5 @@
 using Microsoft.WindowsAPICodePack.Taskbar;
+using System.ComponentModel;
 using Timer = System.Windows.Forms.Timer;
 
 namespace Tailscale_Windows_Control;
@@ -28,7 +29,9 @@ public partial class FrmMain : Form
         }
         if (_vm is null)
         {
-            Application.Exit();
+            MessageBox.Show("Cannot find Tailscale, exiting.", "Tailscale not found", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+            Application.Exit(new CancelEventArgs(true));
+            Environment.Exit(1);
         }
 
         _btnGetStatus = new()
