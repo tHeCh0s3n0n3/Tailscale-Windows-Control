@@ -7,10 +7,10 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
-    <AssemblyVersion>1.0.23035.1</AssemblyVersion>
-    <FileVersion>1.0.23035.1</FileVersion>
+    <AssemblyVersion>1.1.23043.1</AssemblyVersion>
+    <FileVersion>1.1.23043.1</FileVersion>
     <ApplicationIcon>Icons\Tailscale.ico</ApplicationIcon>
-    <Version>1.0.23035.1</Version>
+    <Version>1.1.23043.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -32,6 +32,21 @@
     <EmbeddedResource Include="Icons\Tailscale.ico" />
     <EmbeddedResource Include="Icons\Tailscale_connected.ico" />
     <EmbeddedResource Include="Icons\Tailscale_connected_arrow.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
   </ItemGroup>
 
 </Project>

@@ -1,3 +1,4 @@
+using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Taskbar;
 using System.ComponentModel;
 using Timer = System.Windows.Forms.Timer;
@@ -19,13 +20,41 @@ public partial class FrmMain : Form
     {
         InitializeComponent();
         
-        if (File.Exists("C:\\Program Files (x86)\\Tailscale IPN\\tailscale.exe"))
+        if (Properties.Settings.Default.TailscaleLocation is not null
+            && File.Exists(Properties.Settings.Default.TailscaleLocation))
+        {
+            _vm = new(Properties.Settings.Default.TailscaleLocation);
+        }
+
+        if (_vm is null
+            && File.Exists("C:\\Program Files (x86)\\Tailscale IPN\\tailscale.exe"))
         {
             _vm = new("C:\\Program Files (x86)\\Tailscale IPN\\tailscale.exe");
         }
-        if (File.Exists("C:\\Program Files\\Tailscale IPN\\tailscale.exe"))
+        if (_vm is null
+            && File.Exists("C:\\Program Files\\Tailscale IPN\\tailscale.exe"))
         {
             _vm = new("C:\\Program Files\\Tailscale IPN\\tailscale.exe");
+        }
+        if (_vm is null
+            && TailscaleIsInstalled())
+        {
+            // We found tailscale installed, but can't find where. Ask the User
+            OpenFileDialog ofd = new OpenFileDialog()
+            {
+                Title = "Select Tailscale executable",
+                Filter = "Tailscale Executable (tailscale.exe)|tailscale.exe|All Executables (*.exe)|*.exe|All Files (*.*)|*.*"
+            };
+
+            if (DialogResult.OK == ofd.ShowDialog())
+            {
+                if (File.Exists(ofd.FileName))
+                {
+                    Properties.Settings.Default.TailscaleLocation = ofd.FileName;
+                    Properties.Settings.Default.Save();
+                    _vm = new(Properties.Settings.Default.TailscaleLocation);
+                }
+            }
         }
         if (_vm is null)
         {
@@ -51,6 +80,36 @@ public partial class FrmMain : Form
 
         lblStatusText.DataBindings.Add("Text", _vm, nameof(_vm.StatusLabel));
         this.DataBindings.Add("Icon", _vm, nameof(_vm.TaskbarIcon));
+    }
+
+    private static bool TailscaleIsInstalled()
+    {
+        RegistryKey? key = Registry.LocalMachine.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Uninstall");
+        if (key is null)
+        {
+            return false;
+        }
+
+        foreach(string subKeyName in key.GetSubKeyNames())
+        {
+            RegistryKey? subKey = key.OpenSubKey(subKeyName);
+            if (subKey is null)
+            {
+                continue;
+            }
+
+            if (subKey.GetValue("DisplayName") is not string displayName)
+            {
+                continue;
+            }
+
+            if (displayName.Contains("tailscale", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private async void Timer_Tick(object? sender, EventArgs e)
