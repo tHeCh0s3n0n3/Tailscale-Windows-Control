@@ -8,7 +8,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyVersion>1.2.23230.3</AssemblyVersion>
-    <FileVersion>1.2.23230.2</FileVersion>
+    <FileVersion>1.2.23230.3</FileVersion>
     <ApplicationIcon>Icons\Tailscale.ico</ApplicationIcon>
     <Version>1.2.23230.3</Version>
   </PropertyGroup>
