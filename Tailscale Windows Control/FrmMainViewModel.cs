@@ -19,6 +19,7 @@ public sealed partial class FrmMainViewModel : ObservableObject
     public string TailscaleLocation { get; init; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(TaskbarIconOverlayText))]
     private string? statusLabel;
 
     [ObservableProperty]
@@ -28,6 +29,9 @@ public sealed partial class FrmMainViewModel : ObservableObject
     private TailscaleStatus? status;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(TaskbarIcon))]
+    [NotifyPropertyChangedFor(nameof(TaskbarIconOverlay))]
+    [NotifyPropertyChangedFor(nameof(TaskbarIconOverlayText))]
     private bool isConnected;
 
     public Icon TaskbarIcon
