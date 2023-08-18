@@ -11,7 +11,7 @@ namespace Tailscale_Windows_Control;
 public sealed partial class FrmMainViewModel : ObservableObject
 {
     private static readonly Assembly AppContext = Assembly.GetExecutingAssembly();
-    private static readonly string[] Resources = AppContext.GetManifestResourceNames();
+    //private static readonly string[] Resources = AppContext.GetManifestResourceNames();
     private static readonly Icon ConnectedIcon = new(AppContext.GetManifestResourceStream("Tailscale_Windows_Control.Icons.Tailscale_connected.ico") ?? Stream.Null);
     private static readonly Icon DisconnectedIcon = new(AppContext.GetManifestResourceStream("Tailscale_Windows_Control.Icons.Tailscale.ico") ?? Stream.Null);
     private static readonly Icon ConnectedIconOverlay = new(AppContext.GetManifestResourceStream("Tailscale_Windows_Control.Icons.Tailscale_connected_arrow.ico") ?? Stream.Null);
