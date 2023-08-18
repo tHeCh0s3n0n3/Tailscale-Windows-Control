@@ -22,9 +22,7 @@ public partial class FrmMain : Form
         , @"C:\Program Files\Tailscale\tailscale.exe"
     };
 
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     public FrmMain()
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     {
         InitializeComponent();
         
@@ -49,7 +47,7 @@ public partial class FrmMain : Form
             && TailscaleIsInstalled())
         {
             // We found tailscale installed, but can't find where. Ask the User
-            OpenFileDialog ofd = new OpenFileDialog()
+            OpenFileDialog ofd = new()
             {
                 Title = "Select Tailscale executable",
                 Filter = "Tailscale Executable (tailscale.exe)|tailscale.exe|All Executables (*.exe)|*.exe|All Files (*.*)|*.*"
