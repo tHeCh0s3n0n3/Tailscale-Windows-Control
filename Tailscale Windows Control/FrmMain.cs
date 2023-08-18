@@ -5,6 +5,8 @@ namespace Tailscale_Windows_Control;
 
 public partial class FrmMain : Form
 {
+    public bool InitSuccess { get; init; } = true;
+
     public readonly FrmMainViewModel _vm;
     public readonly Button _btnGetStatus;
     public readonly Timer _timer;
@@ -12,23 +14,33 @@ public partial class FrmMain : Form
 
     private readonly NotifyIcon taskbarIcon = new();
 
+    private readonly List<string> _tailScaleLocations = new()
+    {
+        @"C:\Program Files (x86)\Tailscale IPN\tailscale.exe"
+        , @"C:\Program Files (x86)\Tailscale\tailscale.exe"
+        , @"C:\Program Files\Tailscale IPN\tailscale.exe"
+        , @"C:\Program Files\Tailscale\tailscale.exe"
+    };
+
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     public FrmMain()
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     {
         InitializeComponent();
         
-        if (File.Exists("C:\\Program Files (x86)\\Tailscale IPN\\tailscale.exe"))
+        foreach(string location in _tailScaleLocations)
         {
-            _vm = new("C:\\Program Files (x86)\\Tailscale IPN\\tailscale.exe");
+            if (File.Exists(location))
+            {
+                _vm = new(location);
+            }
         }
-        if (File.Exists("C:\\Program Files\\Tailscale IPN\\tailscale.exe"))
-        {
-            _vm = new("C:\\Program Files\\Tailscale IPN\\tailscale.exe");
-        }
+
         if (_vm is null)
         {
-            Application.Exit();
+            MessageBox.Show("Cannot find TailScale, exiting.");
+            InitSuccess = false;
+            return;
         }
 
         _btnGetStatus = new()
