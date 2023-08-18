@@ -14,6 +14,14 @@ public partial class FrmMain : Form
 
     private readonly NotifyIcon taskbarIcon = new();
 
+    private readonly List<string> _tailScaleLocations = new()
+    {
+        @"C:\Program Files (x86)\Tailscale IPN\tailscale.exe"
+        , @"C:\Program Files (x86)\Tailscale\tailscale.exe"
+        , @"C:\Program Files\Tailscale IPN\tailscale.exe"
+        , @"C:\Program Files\Tailscale\tailscale.exe"
+    };
+
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     public FrmMain()
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
@@ -26,16 +34,17 @@ public partial class FrmMain : Form
             _vm = new(Properties.Settings.Default.TailscaleLocation);
         }
 
-        if (_vm is null
-            && File.Exists("C:\\Program Files (x86)\\Tailscale IPN\\tailscale.exe"))
+        if (_vm is null)
         {
-            _vm = new("C:\\Program Files (x86)\\Tailscale IPN\\tailscale.exe");
+            foreach (string location in _tailScaleLocations)
+            {
+                if (File.Exists(location))
+                {
+                    _vm = new(location);
+                }
+            }
         }
-        if (_vm is null
-            && File.Exists("C:\\Program Files\\Tailscale IPN\\tailscale.exe"))
-        {
-            _vm = new("C:\\Program Files\\Tailscale IPN\\tailscale.exe");
-        }
+
         if (_vm is null
             && TailscaleIsInstalled())
         {
