@@ -54,8 +54,7 @@ public sealed partial class FrmMainViewModel : ObservableObject
         TailscaleLocation = tailscaleExecutablePath;
     }
 
-    [RelayCommand]
-    private async void Connect(IPAddress? ipAddress)
+    private async Task Connect(IPAddress? ipAddress)
     {
         ArgumentNullException.ThrowIfNull(ipAddress);
 
@@ -64,8 +63,7 @@ public sealed partial class FrmMainViewModel : ObservableObject
         StatusLabel = "Connecting...";
     }
 
-    [RelayCommand]
-    private async void Disconnect()
+    private async Task Disconnect()
     {
         CommandResult = await ExecuteTailscaleCommand("up --reset --exit-node=");
         StatusLabel = "Disconnecting...";
@@ -144,11 +142,11 @@ public sealed partial class FrmMainViewModel : ObservableObject
                 ipAddresses.Add(IPAddress.Parse(item));
             }
 
-            Connect(ipAddresses.FirstOrDefault(ip => ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork));
+            await Connect(ipAddresses.FirstOrDefault(ip => ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork));
         }
         else
         {
-            Disconnect();
+            await Disconnect();
         }
 
         await GetStatus();
