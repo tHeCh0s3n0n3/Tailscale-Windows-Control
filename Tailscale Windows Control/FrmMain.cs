@@ -47,22 +47,21 @@ public partial class FrmMain : Form
             && TailscaleIsInstalled())
         {
             // We found tailscale installed, but can't find where. Ask the User
-            OpenFileDialog ofd = new()
+            using OpenFileDialog ofd = new()
             {
                 Title = "Select Tailscale executable",
                 Filter = "Tailscale Executable (tailscale.exe)|tailscale.exe|All Executables (*.exe)|*.exe|All Files (*.*)|*.*"
             };
 
-            if (DialogResult.OK == ofd.ShowDialog())
+            if (DialogResult.OK == ofd.ShowDialog()
+                && File.Exists(ofd.FileName))
             {
-                if (File.Exists(ofd.FileName))
-                {
-                    Properties.Settings.Default.TailscaleLocation = ofd.FileName;
-                    Properties.Settings.Default.Save();
-                    _vm = new(Properties.Settings.Default.TailscaleLocation);
-                }
+                Properties.Settings.Default.TailscaleLocation = ofd.FileName;
+                Properties.Settings.Default.Save();
+                _vm = new(Properties.Settings.Default.TailscaleLocation);
             }
         }
+
         if (_vm is null)
         {
             MessageBox.Show("Cannot find Tailscale, exiting.", "Tailscale not found", MessageBoxButtons.OK, MessageBoxIcon.Stop);
@@ -97,9 +96,8 @@ public partial class FrmMain : Form
             return false;
         }
 
-        foreach(string subKeyName in key.GetSubKeyNames())
+        foreach(RegistryKey? subKey in key.GetSubKeyNames().Select(skn => key.OpenSubKey(skn)))
         {
-            RegistryKey? subKey = key.OpenSubKey(subKeyName);
             if (subKey is null)
             {
                 continue;
