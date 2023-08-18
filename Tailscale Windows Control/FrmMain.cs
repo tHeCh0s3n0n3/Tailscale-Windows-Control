@@ -1,12 +1,12 @@
+using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Taskbar;
+using System.ComponentModel;
 using Timer = System.Windows.Forms.Timer;
 
 namespace Tailscale_Windows_Control;
 
 public partial class FrmMain : Form
 {
-    public bool InitSuccess { get; init; } = true;
-
     public readonly FrmMainViewModel _vm;
     public readonly Button _btnGetStatus;
     public readonly Timer _timer;
@@ -14,33 +14,53 @@ public partial class FrmMain : Form
 
     private readonly NotifyIcon taskbarIcon = new();
 
-    private readonly List<string> _tailScaleLocations = new()
-    {
-        @"C:\Program Files (x86)\Tailscale IPN\tailscale.exe"
-        , @"C:\Program Files (x86)\Tailscale\tailscale.exe"
-        , @"C:\Program Files\Tailscale IPN\tailscale.exe"
-        , @"C:\Program Files\Tailscale\tailscale.exe"
-    };
-
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     public FrmMain()
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     {
         InitializeComponent();
         
-        foreach(string location in _tailScaleLocations)
+        if (Properties.Settings.Default.TailscaleLocation is not null
+            && File.Exists(Properties.Settings.Default.TailscaleLocation))
         {
-            if (File.Exists(location))
-            {
-                _vm = new(location);
-            }
+            _vm = new(Properties.Settings.Default.TailscaleLocation);
         }
 
+        if (_vm is null
+            && File.Exists("C:\\Program Files (x86)\\Tailscale IPN\\tailscale.exe"))
+        {
+            _vm = new("C:\\Program Files (x86)\\Tailscale IPN\\tailscale.exe");
+        }
+        if (_vm is null
+            && File.Exists("C:\\Program Files\\Tailscale IPN\\tailscale.exe"))
+        {
+            _vm = new("C:\\Program Files\\Tailscale IPN\\tailscale.exe");
+        }
+        if (_vm is null
+            && TailscaleIsInstalled())
+        {
+            // We found tailscale installed, but can't find where. Ask the User
+            OpenFileDialog ofd = new OpenFileDialog()
+            {
+                Title = "Select Tailscale executable",
+                Filter = "Tailscale Executable (tailscale.exe)|tailscale.exe|All Executables (*.exe)|*.exe|All Files (*.*)|*.*"
+            };
+
+            if (DialogResult.OK == ofd.ShowDialog())
+            {
+                if (File.Exists(ofd.FileName))
+                {
+                    Properties.Settings.Default.TailscaleLocation = ofd.FileName;
+                    Properties.Settings.Default.Save();
+                    _vm = new(Properties.Settings.Default.TailscaleLocation);
+                }
+            }
+        }
         if (_vm is null)
         {
-            MessageBox.Show("Cannot find TailScale, exiting.");
-            InitSuccess = false;
-            return;
+            MessageBox.Show("Cannot find Tailscale, exiting.", "Tailscale not found", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+            Application.Exit(new CancelEventArgs(true));
+            Environment.Exit(1);
         }
 
         _btnGetStatus = new()
@@ -60,6 +80,36 @@ public partial class FrmMain : Form
 
         lblStatusText.DataBindings.Add("Text", _vm, nameof(_vm.StatusLabel));
         this.DataBindings.Add("Icon", _vm, nameof(_vm.TaskbarIcon));
+    }
+
+    private static bool TailscaleIsInstalled()
+    {
+        RegistryKey? key = Registry.LocalMachine.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Uninstall");
+        if (key is null)
+        {
+            return false;
+        }
+
+        foreach(string subKeyName in key.GetSubKeyNames())
+        {
+            RegistryKey? subKey = key.OpenSubKey(subKeyName);
+            if (subKey is null)
+            {
+                continue;
+            }
+
+            if (subKey.GetValue("DisplayName") is not string displayName)
+            {
+                continue;
+            }
+
+            if (displayName.Contains("tailscale", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private async void Timer_Tick(object? sender, EventArgs e)
