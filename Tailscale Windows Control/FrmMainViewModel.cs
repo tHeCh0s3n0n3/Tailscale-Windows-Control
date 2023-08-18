@@ -102,7 +102,8 @@ public sealed partial class FrmMainViewModel : ObservableObject
             CommandResult = output;
         }
 
-        Status = await JsonSerializer.DeserializeAsync<TailscaleStatus>(new MemoryStream(Encoding.UTF8.GetBytes(output)));
+        using MemoryStream ms = new(Encoding.UTF8.GetBytes(output));
+        Status = await JsonSerializer.DeserializeAsync<TailscaleStatus>(ms);
         
         Peer? connectedPeer = Status?.Peers
                                     ?.Select(p => p.Value)

@@ -34,12 +34,11 @@ public partial class FrmMain : Form
 
         if (_vm is null)
         {
-            foreach (string location in _tailScaleLocations)
+            string? foundLocation = _tailScaleLocations.Where(fl => File.Exists(fl))
+                                                       .FirstOrDefault();
+            if (foundLocation is not null)
             {
-                if (File.Exists(location))
-                {
-                    _vm = new(location);
-                }
+                _vm = new(foundLocation);
             }
         }
 
