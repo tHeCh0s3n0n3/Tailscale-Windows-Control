@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace Tailscale_Windows_Control;
 
-public sealed partial class FrmMainViewModel : ObservableObject
+public sealed partial class FrmMainViewModel(string tailscaleExecutablePath) : ObservableObject
 {
     private static readonly Assembly AppContext = Assembly.GetExecutingAssembly();
     //private static readonly string[] Resources = AppContext.GetManifestResourceNames();
@@ -16,11 +16,11 @@ public sealed partial class FrmMainViewModel : ObservableObject
     private static readonly Icon DisconnectedIcon = new(AppContext.GetManifestResourceStream("Tailscale_Windows_Control.Icons.Tailscale.ico") ?? Stream.Null);
     private static readonly Icon ConnectedIconOverlay = new(AppContext.GetManifestResourceStream("Tailscale_Windows_Control.Icons.Tailscale_connected_arrow.ico") ?? Stream.Null);
 
-    public string TailscaleLocation { get; init; }
+    public string TailscaleLocation { get; init; } = tailscaleExecutablePath;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(TaskbarIconOverlayText))]
-    private string? statusLabel;
+    private string statusLabel = string.Empty;
 
     [ObservableProperty]
     private string? commandResult;
@@ -40,19 +40,8 @@ public sealed partial class FrmMainViewModel : ObservableObject
     public Icon? TaskbarIconOverlay
         => IsConnected ? ConnectedIconOverlay : null;
 
-    public string? TaskbarIconOverlayText
-        => IsConnected ? StatusLabel : null;
-
-    //public List<Peer>? ExitNodePeers
-    //    => status?.Peers?.Select(p => p.Value)
-    //                     .Where(p => p.ExitNodeOption.HasValue
-    //                                 && p.ExitNodeOption.Value)
-    //                     .ToList();
-
-    public FrmMainViewModel(string tailscaleExecutablePath)
-    {
-        TailscaleLocation = tailscaleExecutablePath;
-    }
+    public string TaskbarIconOverlayText
+        => IsConnected ? StatusLabel : string.Empty;
 
     private async Task Connect(IPAddress? ipAddress)
     {
@@ -137,8 +126,8 @@ public sealed partial class FrmMainViewModel : ObservableObject
 
         if (peer.ExitNode.HasValue && !peer.ExitNode.Value)
         {
-            List<IPAddress> ipAddresses = new();
-            foreach (string item in peer?.TailscaleIPs?.ToArray() ?? Array.Empty<string>())
+            List<IPAddress> ipAddresses = [];
+            foreach (string item in peer?.TailscaleIPs?.ToArray() ?? [])
             {
                 ipAddresses.Add(IPAddress.Parse(item));
             }

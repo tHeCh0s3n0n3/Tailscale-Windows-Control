@@ -2,15 +2,15 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net7.0-windows</TargetFramework>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
     <RootNamespace>Tailscale_Windows_Control</RootNamespace>
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
-    <AssemblyVersion>1.2.23230.4</AssemblyVersion>
-    <FileVersion>1.2.23230.4</FileVersion>
+    <AssemblyVersion>1.2.23324.1</AssemblyVersion>
+    <FileVersion>1.2.23324.1</FileVersion>
     <ApplicationIcon>Icons\Tailscale.ico</ApplicationIcon>
-    <Version>1.2.23230.4</Version>
+    <Version>1.2.23324.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
     <PackageReference Include="WindowsAPICodePack" Version="7.0.4" />
   </ItemGroup>
 

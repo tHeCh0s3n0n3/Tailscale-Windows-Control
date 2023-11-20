@@ -6,16 +6,26 @@ namespace Tailscale_Windows_Control;
 public sealed class TailscaleStatus
 {
     public string? Version { get; set; }
+
     public string? BackendState { get; set; }
+
     public string? AuthURL { get; set; }
+
     public List<string>? TailscaleIPs { get; set; }
+
     public Peer? Self { get; set; }
+
     public object? Health { get; set; }
+
     public string? MagicDNSSuffix { get; set; }
+
     public CurrentTailnet? CurrentTailnet { get; set; }
+
     public object? CertDomains { get; set; }
+
     [JsonPropertyName("Peer")]
     public Dictionary<string, Peer>? Peers { get; set; }
+
     [JsonPropertyName("User")]
     public Dictionary<string, User>? Users { get; set; }
 

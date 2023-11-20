@@ -14,13 +14,13 @@ public partial class FrmMain : Form
 
     private readonly NotifyIcon taskbarIcon = new();
 
-    private readonly List<string> _tailScaleLocations = new()
-    {
+    private readonly List<string> _tailScaleLocations =
+    [
         @"C:\Program Files (x86)\Tailscale IPN\tailscale.exe"
         , @"C:\Program Files (x86)\Tailscale\tailscale.exe"
         , @"C:\Program Files\Tailscale IPN\tailscale.exe"
         , @"C:\Program Files\Tailscale\tailscale.exe"
-    };
+    ];
 
     public FrmMain()
     {
@@ -123,15 +123,12 @@ public partial class FrmMain : Form
 
         if (_vm.TaskbarIconOverlay is not null)
         {
-#pragma warning disable CS8604 // Possible null reference argument.
-            TaskbarManager.Instance.SetOverlayIcon(_vm.TaskbarIconOverlay, _vm.TaskbarIconOverlayText);
-#pragma warning restore CS8604 // Possible null reference argument.
+
+            TaskbarManager.Instance.SetOverlayIcon(_vm.TaskbarIconOverlay, _vm.TaskbarIconOverlayText!);
         }
         else
         {
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            TaskbarManager.Instance.SetOverlayIcon(null, null);
-#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
+            TaskbarManager.Instance.SetOverlayIcon(null, string.Empty);
         }
         
 
@@ -146,10 +143,10 @@ public partial class FrmMain : Form
 
     private void SetConnectionButtons()
     {
-        List<Peer> newExitNodes = new();
-        List<Button> exitNodeButtons = new();
+        List<Peer> newExitNodes = [];
+        List<Button> exitNodeButtons = [];
 
-        foreach (var peerItem in _vm.Status?.Peers?.ToArray() ?? Array.Empty<KeyValuePair<string, Peer>>())
+        foreach (KeyValuePair<string, Peer> peerItem in _vm.Status?.Peers?.ToArray() ?? [])
         {
             Peer peer = peerItem.Value;
             if (peer is null)
