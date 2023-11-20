@@ -22,6 +22,10 @@ public partial class FrmMain : Form
         , @"C:\Program Files\Tailscale\tailscale.exe"
     ];
 
+    private bool m_isStartup = true;
+    private const int m_startupTimerInterval = 100;
+    private const int m_regularTimerInterval = 2 * 1000;
+
     public FrmMain()
     {
         InitializeComponent();
@@ -78,7 +82,7 @@ public partial class FrmMain : Form
 
         _timer = new()
         {
-            Interval = (int)(new TimeSpan(0, 0, 2)).TotalMilliseconds
+            Interval = m_startupTimerInterval
         };
         _timer.Tick += Timer_Tick;
         _timer.Start();
@@ -119,11 +123,22 @@ public partial class FrmMain : Form
     private async void Timer_Tick(object? sender, EventArgs e)
     {
         await _vm.GetStatusCommand.ExecuteAsync(null);
+
+
+        if (m_isStartup && (_vm.Status?.Peers?.Count ?? 0) > 0)
+        {
+            Timer? tmr = sender as Timer;
+            if (tmr is not null)
+            {
+                tmr.Interval = m_regularTimerInterval;
+            }
+            m_isStartup = false;
+        }
+
         SetConnectionButtons();
 
         if (_vm.TaskbarIconOverlay is not null)
         {
-
             TaskbarManager.Instance.SetOverlayIcon(_vm.TaskbarIconOverlay, _vm.TaskbarIconOverlayText!);
         }
         else
