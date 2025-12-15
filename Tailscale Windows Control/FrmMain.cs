@@ -30,46 +30,17 @@ public partial class FrmMain : Form
     {
         InitializeComponent();
         
-        if (Properties.Settings.Default.TailscaleLocation is not null
-            && File.Exists(Properties.Settings.Default.TailscaleLocation))
-        {
-            _vm = new(Properties.Settings.Default.TailscaleLocation);
-        }
+        FrmMainViewModel? newVM = SetupViewModel();
 
-        if (_vm is null)
-        {
-            string? foundLocation = _tailScaleLocations.Where(fl => File.Exists(fl))
-                                                       .FirstOrDefault();
-            if (foundLocation is not null)
-            {
-                _vm = new(foundLocation);
-            }
-        }
-
-        if (_vm is null
-            && TailscaleIsInstalled())
-        {
-            // We found tailscale installed, but can't find where. Ask the User
-            using OpenFileDialog ofd = new()
-            {
-                Title = "Select Tailscale executable",
-                Filter = "Tailscale Executable (tailscale.exe)|tailscale.exe|All Executables (*.exe)|*.exe|All Files (*.*)|*.*"
-            };
-
-            if (DialogResult.OK == ofd.ShowDialog()
-                && File.Exists(ofd.FileName))
-            {
-                Properties.Settings.Default.TailscaleLocation = ofd.FileName;
-                Properties.Settings.Default.Save();
-                _vm = new(Properties.Settings.Default.TailscaleLocation);
-            }
-        }
-
-        if (_vm is null)
+        if (newVM is null)
         {
             MessageBox.Show("Cannot find Tailscale, exiting.", "Tailscale not found", MessageBoxButtons.OK, MessageBoxIcon.Stop);
             Application.Exit(new CancelEventArgs(true));
             Environment.Exit(1);
+        }
+        else
+        {
+            _vm = newVM;
         }
 
         _btnGetStatus = new()
@@ -90,6 +61,43 @@ public partial class FrmMain : Form
         lblStatusText.DataBindings.Add("Text", _vm, nameof(_vm.StatusLabel));
         this.DataBindings.Add("Icon", _vm, nameof(_vm.TaskbarIcon));
     }
+
+    private FrmMainViewModel? SetupViewModel()
+    {
+        if (Properties.Settings.Default.TailscaleLocation is not null
+            && File.Exists(Properties.Settings.Default.TailscaleLocation))
+        {
+            return new(Properties.Settings.Default.TailscaleLocation);
+        }
+
+            string? foundLocation = _tailScaleLocations.Where(fl => File.Exists(fl))
+                                                       .FirstOrDefault();
+            if (foundLocation is not null)
+            {
+            return new(foundLocation);
+            }
+
+        if (!TailscaleIsInstalled())
+        {
+            return null;
+        }
+
+            using OpenFileDialog ofd = new()
+            {
+                Title = "Select Tailscale executable",
+                Filter = "Tailscale Executable (tailscale.exe)|tailscale.exe|All Executables (*.exe)|*.exe|All Files (*.*)|*.*"
+            };
+
+            if (DialogResult.OK == ofd.ShowDialog()
+                && File.Exists(ofd.FileName))
+            {
+                Properties.Settings.Default.TailscaleLocation = ofd.FileName;
+                Properties.Settings.Default.Save();
+            return new(Properties.Settings.Default.TailscaleLocation);
+            }
+
+        return null;
+        }
 
     private static bool TailscaleIsInstalled()
     {
