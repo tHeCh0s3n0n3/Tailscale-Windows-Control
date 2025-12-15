@@ -78,6 +78,16 @@ public sealed partial class FrmMainViewModel(string tailscaleExecutablePath) : O
     }
 
     [RelayCommand]
+    private async Task GetStatusManually()
+    {
+        if (!IsConnected)
+        {
+            StatusLabel = "Updating Status...";
+        }
+        await GetStatus();
+    }
+
+    [RelayCommand]
     private async Task GetStatus()
     {
         string output = await ExecuteTailscaleCommand("status --json");

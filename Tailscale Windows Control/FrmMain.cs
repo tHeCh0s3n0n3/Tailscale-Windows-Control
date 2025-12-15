@@ -29,7 +29,7 @@ public partial class FrmMain : Form
     public FrmMain()
     {
         InitializeComponent();
-        
+
         FrmMainViewModel? newVM = SetupViewModel();
 
         if (newVM is null)
@@ -65,39 +65,39 @@ public partial class FrmMain : Form
     private FrmMainViewModel? SetupViewModel()
     {
         if (Properties.Settings.Default.TailscaleLocation is not null
-            && File.Exists(Properties.Settings.Default.TailscaleLocation))
+                    && File.Exists(Properties.Settings.Default.TailscaleLocation))
         {
             return new(Properties.Settings.Default.TailscaleLocation);
         }
 
-            string? foundLocation = _tailScaleLocations.Where(fl => File.Exists(fl))
-                                                       .FirstOrDefault();
-            if (foundLocation is not null)
-            {
+        string? foundLocation = _tailScaleLocations.Where(fl => File.Exists(fl))
+                                                   .FirstOrDefault();
+        if (foundLocation is not null)
+        {
             return new(foundLocation);
-            }
+        }
 
         if (!TailscaleIsInstalled())
         {
             return null;
         }
 
-            using OpenFileDialog ofd = new()
-            {
-                Title = "Select Tailscale executable",
-                Filter = "Tailscale Executable (tailscale.exe)|tailscale.exe|All Executables (*.exe)|*.exe|All Files (*.*)|*.*"
-            };
+        using OpenFileDialog ofd = new()
+        {
+            Title = "Select Tailscale executable",
+            Filter = "Tailscale Executable (tailscale.exe)|tailscale.exe|All Executables (*.exe)|*.exe|All Files (*.*)|*.*"
+        };
 
-            if (DialogResult.OK == ofd.ShowDialog()
-                && File.Exists(ofd.FileName))
-            {
-                Properties.Settings.Default.TailscaleLocation = ofd.FileName;
-                Properties.Settings.Default.Save();
+        if (DialogResult.OK == ofd.ShowDialog()
+            && File.Exists(ofd.FileName))
+        {
+            Properties.Settings.Default.TailscaleLocation = ofd.FileName;
+            Properties.Settings.Default.Save();
             return new(Properties.Settings.Default.TailscaleLocation);
-            }
+        }
 
         return null;
-        }
+    }
 
     private static bool TailscaleIsInstalled()
     {
@@ -157,7 +157,7 @@ public partial class FrmMain : Form
     private async void BtnGetStatus_Click(object? sender, EventArgs e)
     {
         ArgumentNullException.ThrowIfNull(sender);
-        await _vm.GetStatusCommand.ExecuteAsync(null);
+        await _vm.GetStatusManuallyCommand.ExecuteAsync(null);
         SetConnectionButtons();
     }
 
