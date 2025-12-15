@@ -30,9 +30,7 @@ public sealed class TailscaleStatus
     public Dictionary<string, User>? Users { get; set; }
 
     public override string ToString()
-    {
-        return $"Status: {BackendState}, Peers: {Peers?.Count}, Users: {Users?.Count}";
-    }
+        => $"Status: {BackendState}, Peers: {Peers?.Count}, Users: {Users?.Count}";
 }
 
 public sealed class User
@@ -44,9 +42,7 @@ public sealed class User
     public List<object>? Roles { get; set; }
 
     public override string ToString()
-    {
-        return $"{DisplayName} ({LoginName}), Roles: {Roles?.Count}";
-    }
+        => $"{DisplayName} ({LoginName}), Roles: {Roles?.Count}";
 }
 
 public sealed class CurrentTailnet
@@ -56,9 +52,7 @@ public sealed class CurrentTailnet
     public bool? MagicDNSEnabled { get; set; }
 
     public override string ToString()
-    {
-        return $"{Name}, Enabled: {MagicDNSEnabled}, Suffix: {MagicDNSSuffix}";
-    }
+        => $"{Name}, Enabled: {MagicDNSEnabled}, Suffix: {MagicDNSSuffix}";
 }
 
 public sealed class Peer : IEquatable<Peer>
@@ -91,9 +85,7 @@ public sealed class Peer : IEquatable<Peer>
     public bool? InEngine { get; set; }
 
     public override string ToString()
-    {
-        return $"{HostName} ({Online}), Exit Node: {ExitNodeOption}";
-    }
+        => $"{HostName} ({Online}), Exit Node: {ExitNodeOption}";
 
     public bool Equals(Peer? other)
     {
@@ -143,16 +135,10 @@ public sealed class Peer : IEquatable<Peer>
 public sealed class PeerComparer : IEqualityComparer<Peer>
 {
     public bool Equals(Peer? x, Peer? y)
-    {
-        if (x is null) return false;
-        return x.Equals(y);
-    }
+        => x?.Equals(y) ?? false;
 
     public int GetHashCode([DisallowNull] Peer obj)
-    {
-        if (obj is null) return 0;
-        return obj.GetHashCode();
-    }
+        => obj?.GetHashCode() ?? 0;
 }
 
 

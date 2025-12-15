@@ -128,10 +128,7 @@ public partial class FrmMain : Form
         if (m_isStartup && (_vm.Status?.Peers?.Count ?? 0) > 0)
         {
             Timer? tmr = sender as Timer;
-            if (tmr is not null)
-            {
-                tmr.Interval = m_regularTimerInterval;
-            }
+            tmr?.Interval = m_regularTimerInterval;
             m_isStartup = false;
         }
 
@@ -192,7 +189,7 @@ public partial class FrmMain : Form
         {
             flpExitNodeButtons.Controls.Clear();
             flpExitNodeButtons.Controls.Add(_btnGetStatus);
-            flpExitNodeButtons.Controls.AddRange(exitNodeButtons.ToArray());
+            flpExitNodeButtons.Controls.AddRange([.. exitNodeButtons]);
             _exitNodes = newExitNodes;
         }
 
