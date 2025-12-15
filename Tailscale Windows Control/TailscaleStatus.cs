@@ -95,16 +95,11 @@ public sealed class Peer : IEquatable<Peer>
 
         if (other.GetType() != this.GetType()) return false;
 
-        if (other is Peer peer)
-        {
-            return peer.ID == this.ID
-                   && peer.Online == this.Online
-                   && peer.Active == this.Active
-                   && peer.ExitNode == this.ExitNode
-                   && peer.ExitNodeOption == this.ExitNodeOption;
-        }
-
-        return this.Equals(other);
+        return other.ID == this.ID
+               && other.Online == this.Online
+               && other.Active == this.Active
+               && other.ExitNode == this.ExitNode
+               && other.ExitNodeOption == this.ExitNodeOption;
     }
 
     public override bool Equals(object? obj)
