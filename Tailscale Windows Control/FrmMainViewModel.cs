@@ -20,28 +20,32 @@ public sealed partial class FrmMainViewModel(string tailscaleExecutablePath) : O
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(TaskbarIconOverlayText))]
-    private string statusLabel = string.Empty;
+    public partial string StatusLabel { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string? commandResult;
+    public partial string? CommandResult { get; set; }
 
     [ObservableProperty]
-    private TailscaleStatus? status;
+    public partial TailscaleStatus? Status { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(TaskbarIcon))]
     [NotifyPropertyChangedFor(nameof(TaskbarIconOverlay))]
     [NotifyPropertyChangedFor(nameof(TaskbarIconOverlayText))]
-    private bool isConnected;
+    public partial bool IsConnected { get; set; }
 
-    public Icon TaskbarIcon
-        => IsConnected ? ConnectedIcon : DisconnectedIcon;
+    public static Icon TaskbarIcon
+    //    => IsConnected ? ConnectedIcon : DisconnectedIcon;
+          => DisconnectedIcon;
 
     public Icon? TaskbarIconOverlay
         => IsConnected ? ConnectedIconOverlay : null;
 
     public string TaskbarIconOverlayText
         => IsConnected ? StatusLabel : string.Empty;
+
+    [ObservableProperty]
+    public partial bool StateChanged { get; set; } = false;
 
     private async Task Connect(IPAddress? ipAddress)
     {
@@ -143,10 +147,12 @@ public sealed partial class FrmMainViewModel(string tailscaleExecutablePath) : O
             }
 
             await Connect(ipAddresses.FirstOrDefault(ip => ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork));
+            StateChanged = true;
         }
         else
         {
             await Disconnect();
+            StateChanged = true;
         }
 
         await GetStatus();

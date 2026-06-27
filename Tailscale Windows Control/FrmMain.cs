@@ -1,5 +1,4 @@
 using Microsoft.Win32;
-using Microsoft.WindowsAPICodePack.Taskbar;
 using System.ComponentModel;
 using Timer = System.Windows.Forms.Timer;
 
@@ -142,16 +141,11 @@ public partial class FrmMain : Form
 
         SetConnectionButtons();
 
-        if (_vm.TaskbarIconOverlay is not null)
+        if (_vm.StateChanged)
         {
-            TaskbarManager.Instance.SetOverlayIcon(_vm.TaskbarIconOverlay, _vm.TaskbarIconOverlayText!);
+            TaskbarService.SetOverlay(this.Handle, _vm.TaskbarIconOverlay, _vm.TaskbarIconOverlayText);
+            _vm.StateChanged = false;
         }
-        else
-        {
-            TaskbarManager.Instance.SetOverlayIcon(null, string.Empty);
-        }
-        
-
     }
 
     private async void BtnGetStatus_Click(object? sender, EventArgs e)
