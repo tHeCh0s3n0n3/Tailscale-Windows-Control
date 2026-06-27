@@ -7,10 +7,10 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
-    <AssemblyVersion>1.4.26178.2</AssemblyVersion>
-    <FileVersion>1.4.26178.2</FileVersion>
+    <AssemblyVersion>1.4.26178.3</AssemblyVersion>
+    <FileVersion>1.4.26178.3</FileVersion>
     <ApplicationIcon>Icons\Tailscale.ico</ApplicationIcon>
-    <Version>1.4.26178.2</Version>
+    <Version>1.4.26178.3</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 

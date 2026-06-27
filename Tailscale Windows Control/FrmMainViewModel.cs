@@ -34,7 +34,7 @@ public sealed partial class FrmMainViewModel(string tailscaleExecutablePath) : O
     [NotifyPropertyChangedFor(nameof(TaskbarIconOverlayText))]
     public partial bool IsConnected { get; set; }
 
-    public static Icon TaskbarIcon
+    public Icon TaskbarIcon
     //    => IsConnected ? ConnectedIcon : DisconnectedIcon;
           => DisconnectedIcon;
 
