@@ -13,6 +13,9 @@ public partial class FrmMain : Form
 
     private readonly NotifyIcon taskbarIcon = new();
 
+    /// <summary>
+    /// List of possible TailScale executable locations.
+    /// </summary>
     private readonly List<string> _tailScaleLocations =
     [
         @"C:\Program Files (x86)\Tailscale IPN\tailscale.exe"
@@ -29,6 +32,8 @@ public partial class FrmMain : Form
     {
         InitializeComponent();
 
+        SystemEvents.UserPreferenceChanged += OnUserPreferenceChanged;
+
         FrmMainViewModel? newVM = SetupViewModel();
 
         if (newVM is null)
@@ -44,8 +49,7 @@ public partial class FrmMain : Form
 
         _btnGetStatus = new()
         {
-            FlatStyle = FlatStyle.Flat
-            , AutoSize = true
+            AutoSize = true
             , Text = "Get Status"
         };
         _btnGetStatus.Click += BtnGetStatus_Click;
@@ -59,6 +63,48 @@ public partial class FrmMain : Form
 
         lblStatusText.DataBindings.Add("Text", _vm, nameof(_vm.StatusLabel));
         this.DataBindings.Add("Icon", _vm, nameof(_vm.TaskbarIcon));
+    }
+
+    private void OnUserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
+    {
+        if (e.Category is UserPreferenceCategory.General or UserPreferenceCategory.Color)
+        {
+            if (!IsDisposed && IsHandleCreated)
+            {
+                BeginInvoke(ApplySystemTheme);
+            }
+        }
+    }
+
+    private void ApplySystemTheme()
+    {
+        if (IsDisposed) return;
+
+        // Re-evaluating SystemColorMode.System queries the updated OS dark/light state
+        Application.SetColorMode(SystemColorMode.System);
+
+        // Force all open forms and child controls to redraw with the new SystemColors/VisualStyles
+        foreach (Form form in Application.OpenForms)
+        {
+            form.Invalidate(true);
+            form.Update();
+        }
+    }
+
+    /// <summary>
+    ///  Clean up any resources being used.
+    /// </summary>
+    /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+    /// <inheritdoc cref="SystemEvents.UserPreferenceChanged" path="/exception"/>
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            // Mandatory: SystemEvents is static and will leak the Form if not unsubscribed
+            SystemEvents.UserPreferenceChanged -= OnUserPreferenceChanged;
+            components?.Dispose();
+        }
+        base.Dispose(disposing);
     }
 
     private FrmMainViewModel? SetupViewModel()
@@ -131,7 +177,6 @@ public partial class FrmMain : Form
     {
         await _vm.GetStatusCommand.ExecuteAsync(null);
 
-
         if (m_isStartup && (_vm.Status?.Peers?.Count ?? 0) > 0)
         {
             Timer? tmr = sender as Timer;
@@ -175,8 +220,7 @@ public partial class FrmMain : Form
 
             Button newButton = new()
             {
-                FlatStyle = FlatStyle.Flat
-                , AutoSize = true
+                AutoSize = true
                 , Text = $"{(peer.ExitNode.HasValue && peer.ExitNode.Value ? "Disconnect" : "Connect")} {peer.HostName}"
                 , Tag = peerItem.Key
             };
