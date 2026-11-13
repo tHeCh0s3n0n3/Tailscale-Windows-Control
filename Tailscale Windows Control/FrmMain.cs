@@ -8,6 +8,10 @@ public partial class FrmMain : Form
 {
     public readonly FrmMainViewModel _vm;
     public readonly Button _btnGetStatus;
+
+    /// <summary>
+    /// Global timer which when ticked polls TailScale for status changes.
+    /// </summary>
     public readonly Timer _timer;
     private List<Peer>? _exitNodes;
 
@@ -24,10 +28,26 @@ public partial class FrmMain : Form
         , @"C:\Program Files\Tailscale\tailscale.exe"
     ];
 
+    /// <summary>
+    /// Flag to indicate that we are still in start-up mode.
+    /// </summary>
     private bool m_isStartup = true;
+
+    /// <summary>
+    /// Time in milliseconds to tick the global timer at startup which polls TailScale.
+    /// </summary>
     private const int m_startupTimerInterval = 100;
+
+    /// <summary>
+    /// Time in milliseconds to tick the global timer which polls TailScale.
+    /// </summary>
     private const int m_regularTimerInterval = 2 * 1000;
 
+    /// <inheritdoc cref="SystemEvents.UserPreferenceChanged" path="/exception"/>
+    /// <inheritdoc cref="SetupViewModel" path="/exception"/>
+    /// <inheritdoc cref="MessageBox.Show(string?, string?, MessageBoxButtons, MessageBoxIcon)" path="/exception"/>
+    /// <inheritdoc cref="Environment.Exit(int)" path="/exception"/>
+    /// <inheritdoc cref="ControlBindingsCollection.Add(string, object, string?)" path="/exception"/>
     public FrmMain()
     {
         InitializeComponent();
@@ -62,9 +82,14 @@ public partial class FrmMain : Form
         _timer.Start();
 
         lblStatusText.DataBindings.Add("Text", _vm, nameof(_vm.StatusLabel));
-        this.DataBindings.Add("Icon", _vm, nameof(_vm.TaskbarIcon));
+        this.DataBindings.Add("Icon", _vm, nameof(FrmMainViewModel.TaskbarIcon));
     }
 
+    /// <summary>
+    /// Event handler for when a UserPreference changes. This is used to reset the SystemTheme (if required).
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void OnUserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
     {
         if (e.Category is UserPreferenceCategory.General or UserPreferenceCategory.Color)
@@ -76,6 +101,9 @@ public partial class FrmMain : Form
         }
     }
 
+    /// <summary>
+    /// Applies the system theme and ensures that the form is redrawn
+    /// </summary>
     private void ApplySystemTheme()
     {
         if (IsDisposed) return;
@@ -107,6 +135,12 @@ public partial class FrmMain : Form
         base.Dispose(disposing);
     }
 
+    /// <summary>
+    /// Initializes the ViewModel
+    /// </summary>
+    /// <returns>A fully initialized <see cref="FrmMainViewModel"/> or <see langword="null"/> on failure to initialize</returns>
+    /// <inheritdoc cref="System.Linq.Enumerable.Where" path="/exception"/>
+    /// <inheritdoc cref="System.Linq.Enumerable.FirstOrDefault{TSource}(IEnumerable{TSource})" path="/exception"/>
     private FrmMainViewModel? SetupViewModel()
     {
         if (Properties.Settings.Default.TailscaleLocation is not null
@@ -144,6 +178,14 @@ public partial class FrmMain : Form
         return null;
     }
 
+    /// <summary>
+    /// Checks if Tailscale is intalled
+    /// </summary>
+    /// <returns><see langword="true" /> if Tailscale is detected or <see langword="false"/> otherwise.</returns>
+    /// <inheritdoc cref="RegistryKey.OpenSubKey(string)" path="/exception"/>
+    /// <inheritdoc cref="RegistryKey.GetSubKeyNames" path="/exception"/>
+    /// <inheritdoc cref="RegistryKey.GetValue(string?)" path="/exception"/>
+    /// <inheritdoc cref="System.Linq.Enumerable.Select{TSource, TResult}(IEnumerable{TSource}, Func{TSource, TResult})" path="/exception"/>
     private static bool TailscaleIsInstalled()
     {
         RegistryKey? key = Registry.LocalMachine.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Uninstall");
@@ -173,6 +215,14 @@ public partial class FrmMain : Form
         return false;
     }
 
+    /// <summary>
+    /// Event handler for timer tick
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    /// <inheritdoc cref="CommunityToolkit.Mvvm.Input.IAsyncRelayCommand.ExecuteAsync(object?)" path="/exception"/>
+    /// <inheritdoc cref="SetConnectionButtons" path="/exception"/>
+    /// <inheritdoc cref="TaskbarService.SetOverlay(nint, Icon?, string)" path="/exception"/>
     private async void Timer_Tick(object? sender, EventArgs e)
     {
         await _vm.GetStatusCommand.ExecuteAsync(null);
@@ -193,6 +243,14 @@ public partial class FrmMain : Form
         }
     }
 
+    /// <summary>
+    /// Event handler triggered when the GetStatus button is clicked.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    /// <exception cref="ArgumentNullException" />
+    /// <inheritdoc cref="CommunityToolkit.Mvvm.Input.IAsyncRelayCommand.ExecuteAsync(object?)" path="/exception"/>    /// 
+    /// <inheritdoc cref="SetConnectionButtons" path="/exception"/>
     private async void BtnGetStatus_Click(object? sender, EventArgs e)
     {
         ArgumentNullException.ThrowIfNull(sender);
@@ -200,6 +258,15 @@ public partial class FrmMain : Form
         SetConnectionButtons();
     }
 
+    /// <summary>
+    /// Creates and configures the exit node connection buttons.
+    /// </summary>
+    /// <inheritdoc cref="System.Linq.Enumerable.ToArray{TSource}(IEnumerable{TSource})" path="/exception"/>
+    /// <inheritdoc cref="System.Linq.Enumerable.ExceptBy{TSource, TKey}(IEnumerable{TSource}, IEnumerable{TKey}, Func{TSource, TKey})" path="/exception"/>
+    /// <inheritdoc cref="System.Linq.Enumerable.Any{TSource}(IEnumerable{TSource})" path="/exception"/>
+    /// <inheritdoc cref="Nullable{T}.Value" path="/exception"/>
+    /// <inheritdoc cref="BtnExitNode_Click(object?, EventArgs)" path="/exception"/>
+    /// <inheritdoc cref="Control.ControlCollection.Add(Control)" path="/exception"/>
     private void SetConnectionButtons()
     {
         List<Peer> newExitNodes = [];
@@ -240,9 +307,14 @@ public partial class FrmMain : Form
         }
 
         taskbarIcon.Visible = true;
-        taskbarIcon.Icon = _vm.TaskbarIcon;
+        taskbarIcon.Icon = FrmMainViewModel.TaskbarIcon;
     }
 
+    /// <summary>
+    /// Event handler triggered when an exit node connection button is clicked.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private async void BtnExitNode_Click(object? sender, EventArgs e)
     {
         if (sender is null)

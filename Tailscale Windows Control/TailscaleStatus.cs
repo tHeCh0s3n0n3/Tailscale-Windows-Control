@@ -131,7 +131,7 @@ public sealed class PeerComparer : IEqualityComparer<Peer>
 {
     public bool Equals(Peer? x, Peer? y)
         => x?.Equals(y) ?? false;
-
+    
     public int GetHashCode([DisallowNull] Peer obj)
         => obj?.GetHashCode() ?? 0;
 }

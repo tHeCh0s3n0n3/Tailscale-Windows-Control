@@ -7,6 +7,7 @@ public static class TaskbarService
     [ComImport]
     [Guid("EA1AFB91-9E28-4B86-90E9-9E9F8A5EEFAF")]
     [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "SYSLIB1096:Convert to 'GeneratedComInterface'", Justification = "Since we use TaskbarList which requires [ComImport] we cannot mix and match.")]
     private interface ITaskbarList3
     {
         // ITaskbarList
