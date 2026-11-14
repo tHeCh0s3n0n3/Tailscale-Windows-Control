@@ -190,7 +190,7 @@ public sealed partial class FrmMainViewModel : ObservableObject
         if (peer.ExitNode.HasValue && !peer.ExitNode.Value)
         {
             List<IPAddress> ipAddresses = [];
-            foreach (string item in peer?.TailscaleIPs?.ToArray() ?? [])
+            foreach (string item in peer.TailscaleIPs?.ToArray() ?? [])
             {
                 ipAddresses.Add(IPAddress.Parse(item));
             }

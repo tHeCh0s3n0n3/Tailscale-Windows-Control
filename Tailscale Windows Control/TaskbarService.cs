@@ -49,7 +49,7 @@ public static class TaskbarService
             _taskbarList = (ITaskbarList3)new TaskbarList();
             _taskbarList.HrInit();
         }
-        catch
+        catch (COMException)
         {
             _taskbarList = null; // Fallback if OS doesn't support it
         }

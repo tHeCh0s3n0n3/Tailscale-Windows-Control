@@ -94,12 +94,11 @@ public partial class FrmMain : Form
     /// <param name="e"></param>
     private void OnUserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
     {
-        if (e.Category is UserPreferenceCategory.General or UserPreferenceCategory.Color)
+        if (e.Category is UserPreferenceCategory.General or UserPreferenceCategory.Color
+            && !IsDisposed
+            && IsHandleCreated)
         {
-            if (!IsDisposed && IsHandleCreated)
-            {
-                BeginInvoke(ApplySystemTheme);
-            }
+            BeginInvoke(ApplySystemTheme);
         }
     }
 
