@@ -1,5 +1,6 @@
 using Microsoft.Win32;
 using System.ComponentModel;
+using System.Reflection;
 using Timer = System.Windows.Forms.Timer;
 
 namespace Tailscale_Windows_Control;
@@ -48,6 +49,7 @@ public partial class FrmMain : Form
     /// <inheritdoc cref="MessageBox.Show(string?, string?, MessageBoxButtons, MessageBoxIcon)" path="/exception"/>
     /// <inheritdoc cref="Environment.Exit(int)" path="/exception"/>
     /// <inheritdoc cref="ControlBindingsCollection.Add(string, object, string?)" path="/exception"/>
+    /// <inheritdoc cref="Assembly.GetManifestResourceStream(string)" path="/exception"/>
     public FrmMain()
     {
         InitializeComponent();
@@ -82,7 +84,7 @@ public partial class FrmMain : Form
         _timer.Start();
 
         lblStatusText.DataBindings.Add("Text", _vm, nameof(_vm.StatusLabel));
-        this.DataBindings.Add("Icon", _vm, nameof(FrmMainViewModel.TaskbarIcon));
+        Icon = new(Assembly.GetExecutingAssembly().GetManifestResourceStream("Tailscale_Windows_Control.Icons.Tailscale.ico") ?? Stream.Null);
     }
 
     /// <summary>
@@ -307,7 +309,6 @@ public partial class FrmMain : Form
         }
 
         taskbarIcon.Visible = true;
-        taskbarIcon.Icon = FrmMainViewModel.TaskbarIcon;
     }
 
     /// <summary>

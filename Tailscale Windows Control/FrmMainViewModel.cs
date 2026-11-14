@@ -11,7 +11,6 @@ namespace Tailscale_Windows_Control;
 public sealed partial class FrmMainViewModel(string tailscaleExecutablePath) : ObservableObject
 {
     private static readonly Assembly AppContext = Assembly.GetExecutingAssembly();
-    private static readonly Icon AppIcon = new(AppContext.GetManifestResourceStream("Tailscale_Windows_Control.Icons.Tailscale.ico") ?? Stream.Null);
     private static readonly Icon ConnectedIconOverlay = new(AppContext.GetManifestResourceStream("Tailscale_Windows_Control.Icons.Tailscale_connected_arrow.ico") ?? Stream.Null);
 
     public string TailscaleLocation { get; init; } = tailscaleExecutablePath;
@@ -30,9 +29,6 @@ public sealed partial class FrmMainViewModel(string tailscaleExecutablePath) : O
     [NotifyPropertyChangedFor(nameof(TaskbarIconOverlay))]
     [NotifyPropertyChangedFor(nameof(TaskbarIconOverlayText))]
     public partial bool IsConnected { get; set; }
-
-    public static Icon TaskbarIcon
-        => AppIcon;
 
     public Icon? TaskbarIconOverlay
         => IsConnected ? ConnectedIconOverlay : null;
