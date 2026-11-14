@@ -8,12 +8,12 @@ using System.Reflection;
 
 namespace Tailscale_Windows_Control;
 
-public sealed partial class FrmMainViewModel(string tailscaleExecutablePath) : ObservableObject
+public sealed partial class FrmMainViewModel : ObservableObject
 {
     private static readonly Assembly AppContext = Assembly.GetExecutingAssembly();
     private static readonly Icon ConnectedIconOverlay = new(AppContext.GetManifestResourceStream("Tailscale_Windows_Control.Icons.Tailscale_connected_arrow.ico") ?? Stream.Null);
 
-    public string TailscaleLocation { get; init; } = tailscaleExecutablePath;
+    public string TailscaleLocation { get; init; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(TaskbarIconOverlayText))]
@@ -39,54 +39,100 @@ public sealed partial class FrmMainViewModel(string tailscaleExecutablePath) : O
     [ObservableProperty]
     public partial bool StateChanged { get; set; } = false;
 
-    private async Task Connect(IPAddress? ipAddress)
+    private readonly ProcessStartInfo _processStartInfoDefault;
+
+    public FrmMainViewModel(string tailscaleExecutablePath)
+    {
+        TailscaleLocation = tailscaleExecutablePath;
+
+        _processStartInfoDefault
+            = new ProcessStartInfo(TailscaleLocation)
+        {
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            CreateNoWindow = true,
+            LoadUserProfile = false,
+            WindowStyle = ProcessWindowStyle.Hidden
+        };
+    }
+
+    /// <summary>
+    /// Configures Tailscale to use a specific exit node.
+    /// </summary>
+    /// <param name="ipAddress">IP Address of the exit node to route all non-LAN traffic through.</param>
+    /// <param name="cancellationToken"></param>
+    /// <exception cref="ArgumentNullException" />
+    /// <inheritdoc cref="ExecuteTailscaleCommand(string, CancellationToken)" path="/exception"/>
+    private async Task Connect(IPAddress? ipAddress, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(ipAddress);
 
-        CommandResult = await ExecuteTailscaleCommand($"up --reset --exit-node={ipAddress} --exit-node-allow-lan-access");
+        CommandResult = await ExecuteTailscaleCommand($"up --reset --exit-node={ipAddress} --exit-node-allow-lan-access"
+                                                      , cancellationToken);
 
         StatusLabel = "Connecting...";
     }
 
-    private async Task Disconnect()
+    /// <summary>
+    /// Configures Tailscale to reset the use of an exit node.
+    /// </summary>
+    /// <param name="cancellationToken"></param>
+    /// <inheritdoc cref="ExecuteTailscaleCommand(string, CancellationToken)" path="/exception"/>
+    private async Task Disconnect(CancellationToken cancellationToken = default)
     {
-        CommandResult = await ExecuteTailscaleCommand("up --reset --exit-node=");
+        CommandResult = await ExecuteTailscaleCommand("up --reset --exit-node=", cancellationToken);
         StatusLabel = "Disconnecting...";
     }
 
+    /// <summary>
+    /// Executes the Tailscale command as a separate process and captures the output.
+    /// </summary>
+    /// <param name="arguments">CLI arguments to pass on to tailscale.exe</param>
+    /// <param name="cancellationToken"></param>
+    /// <returns>All text emitted by Tailscale to standard output (trimmed).</returns>
+    /// <inheritdoc cref="Process.Start()" path="/exception"/>
+    /// <inheritdoc cref="StreamReader.ReadToEndAsync(CancellationToken)" path="/exception"/>
+    /// <inheritdoc cref="Process.WaitForExitAsync(CancellationToken)" path="/exception"/>
     [RelayCommand]
-    private async Task<string> ExecuteTailscaleCommand(string arguments)
+    private async Task<string> ExecuteTailscaleCommand(string arguments, CancellationToken cancellationToken = default)
     {
-        using Process p = new();
-        p.StartInfo.UseShellExecute = false;
-        p.StartInfo.RedirectStandardOutput = true;
-        p.StartInfo.FileName = TailscaleLocation;
-        p.StartInfo.Arguments = arguments;
-        p.StartInfo.CreateNoWindow = true;
-        p.StartInfo.LoadUserProfile = false;
-        p.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-        p.Start();
+        _processStartInfoDefault.Arguments = arguments;
 
-        string output = await p.StandardOutput.ReadToEndAsync();
-        await p.WaitForExitAsync();
-
-        return output;
+        ProcessTextOutput capturedText
+            = await Process.RunAndCaptureTextAsync(_processStartInfoDefault, cancellationToken);
+        return capturedText.StandardOutput.Trim();
     }
 
+    /// <summary>
+    /// Get the current staus from Tailscale manually.
+    /// </summary>
+    /// <param name="cancellationToken"></param>
+    /// <inheritdoc cref="GetStatus(CancellationToken)" path="/exception"/>
     [RelayCommand]
-    private async Task GetStatusManually()
+    private async Task GetStatusManually(CancellationToken cancellationToken = default)
     {
         if (!IsConnected)
         {
             StatusLabel = "Updating Status...";
         }
-        await GetStatus();
+        await GetStatus(cancellationToken);
     }
 
+    /// <summary>
+    /// Get the current status from Tailscale
+    /// </summary>
+    /// <param name="cancellationToken"></param>
+    /// <inheritdoc cref="ExecuteTailscaleCommand(string, CancellationToken)" path="/exception"/>
+    /// <inheritdoc cref="string.Replace(string, string?)" path="/exception"/>
+    /// <inheritdoc cref="MemoryStream(byte[])" path="/exception"/>
+    /// <inheritdoc cref="JsonSerializer.DeserializeAsync{TValue}(Stream, JsonSerializerOptions?, CancellationToken)" path="/exception"/>
+    /// <inheritdoc cref="System.Linq.Enumerable.Select{TSource, TResult}(IEnumerable{TSource}, Func{TSource, TResult})" path="/exception"/>
+    /// <inheritdoc cref="System.Linq.Enumerable.FirstOrDefault{TSource}(IEnumerable{TSource}, Func{TSource, bool})" path="/exception"/>
     [RelayCommand]
-    private async Task GetStatus()
+    private async Task GetStatus(CancellationToken cancellationToken = default)
     {
-        string output = await ExecuteTailscaleCommand("status --json");
+        string output = await ExecuteTailscaleCommand("status --json", cancellationToken);
         output = output.Replace("\r\n", "\n")
                        .Replace("\n\r", "\n")
                        .Replace("\r", "\n")
@@ -98,7 +144,7 @@ public sealed partial class FrmMainViewModel(string tailscaleExecutablePath) : O
         }
 
         using MemoryStream ms = new(Encoding.UTF8.GetBytes(output));
-        Status = await JsonSerializer.DeserializeAsync<TailscaleStatus>(ms);
+        Status = await JsonSerializer.DeserializeAsync<TailscaleStatus>(ms, options: null, cancellationToken: cancellationToken);
         
         Peer? connectedPeer = Status?.Peers
                                     ?.Select(p => p.Value)
@@ -116,8 +162,19 @@ public sealed partial class FrmMainViewModel(string tailscaleExecutablePath) : O
         }
     }
 
+    /// <summary>
+    /// Handles everything required when an exit node button is clicked.
+    /// </summary>
+    /// <param name="peerId">The peer ID of the exit node.</param>
+    /// <param name="cancellationToken"></param>
+    /// <inheritdoc cref="Nullable{T}.Value" path="/exception"/>
+    /// <inheritdoc cref="IPAddress.Parse(string)" path="/exception"/>
+    /// <inheritdoc cref="Connect(IPAddress?, CancellationToken)" path="/exception"/>
+    /// <inheritdoc cref="System.Linq.Enumerable.FirstOrDefault{TSource}(IEnumerable{TSource}, Func{TSource, bool})" path="/exception"/>
+    /// <inheritdoc cref="Disconnect(CancellationToken)" path="/exception"/>
+    /// <inheritdoc cref="GetStatus(CancellationToken)" path="/exception"/>
     [RelayCommand]
-    private async Task ExitNodeButtonClick(string? peerId)
+    private async Task ExitNodeButtonClick(string? peerId, CancellationToken cancellationToken = default)
     {
         if (peerId is null)
         {
@@ -138,15 +195,16 @@ public sealed partial class FrmMainViewModel(string tailscaleExecutablePath) : O
                 ipAddresses.Add(IPAddress.Parse(item));
             }
 
-            await Connect(ipAddresses.FirstOrDefault(ip => ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork));
+            await Connect(ipAddresses.FirstOrDefault(ip => ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                          , cancellationToken);
             StateChanged = true;
         }
         else
         {
-            await Disconnect();
+            await Disconnect(cancellationToken);
             StateChanged = true;
         }
 
-        await GetStatus();
+        await GetStatus(cancellationToken);
     }
 }
